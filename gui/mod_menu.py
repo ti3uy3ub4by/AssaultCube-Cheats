@@ -2,12 +2,9 @@ from tkinter import Tk, Label, Button, Frame
 from tkinter import ttk
 from configs.config import BG, FG
 from configs.offsets import (
-    BASE_ADDRESS_LIFE, BASE_ADDRESS_ARMOR, BASE_ADDRESS_AIRCRAFT,
-    BASE_ADDRESS_LUKE, BASE_ADDRESS_SPLASER, BASE_ADDRESS_ORBS,
-    BASE_ADDRESS_LASER, BASE_ADDRESS_ROCKETS, BASE_ADDRESS_FLAK, BASE_ADDRESS_THUNDER,
-    OFFSETS_LIFE, OFFSETS_ARMOR, OFFSETS_AIRCRAFT, OFFSETS_LUKE,
-    OFFSETS_SPLASER, OFFSETS_ORBS, OFFSETS_LASER, OFFSETS_ROCKETS,
-    OFFSETS_FLAK, OFFSETS_THUNDER
+    BASE_ADDRESS_ARMOR, BASE_ADDRESS_LUKE,
+    BASE_ADDRESS_SPLASER, OFFSETS_ARMOR, OFFSETS_LUKE,
+    OFFSETS_SPLASER, BASE_ADDRESS_HEALTH, OFFSETS_HEALTH
 )
 import pygetwindow as gw
 import pyautogui
@@ -33,11 +30,6 @@ class ModMenu:
         self.luke_hack_active = Event()
         self.splaser_hack_active = Event()
         self.orbs_hack_active = Event()
-        self.aircraft_hack_active = Event()
-        self.laser_hack_active = Event()
-        self.rockets_hack_active = Event()
-        self.flak_hack_active = Event()
-        self.thunder_hack_active = Event()
         self.game_running = True
 
         self.threads = []
@@ -59,10 +51,9 @@ class ModMenu:
         tab2 = Frame(notebook, bg=BG)
 
         notebook.add(tab1, text='Tab 1')
-        notebook.add(tab2, text='Tab 2')
 
         # Adding buttons to Tab 1
-        self.life_btn = Button(tab1, text="Enable Life Hack", font=('Helvetica', 14), bg='#4CAF50', fg='white',
+        self.life_btn = Button(tab1, text="Enable Health Hack", font=('Helvetica', 14), bg='#4CAF50', fg='white',
                                command=self.toggle_life_hack, width=20)
         self.life_btn.pack(pady=5, fill='x')
 
@@ -78,39 +69,14 @@ class ModMenu:
                                   command=self.toggle_splaser_hack, width=20)
         self.splaser_btn.pack(pady=5, fill='x')
 
-        # Adding buttons to Tab 2
         self.orbs_btn = Button(tab2, text="Max Orbs Hack", font=('Helvetica', 14), bg='#4CAF50', fg='white',
                                command=self.orbs_hack, width=20)
         self.orbs_btn.pack(pady=5, fill='x')
 
-        self.aircraft_btn = Button(tab2, text="Max Aircraft Hack", font=('Helvetica', 14), bg='#4CAF50', fg='white',
-                                   command=self.aircraft_hack, width=20)
-        self.aircraft_btn.pack(pady=5, fill='x')
-
-        self.laser_btn = Button(tab2, text="Max Laser Hack", font=('Helvetica', 14), bg='#4CAF50', fg='white',
-                                command=self.laser_hack, width=20)
-        self.laser_btn.pack(pady=5, fill='x')
-
-        self.rockets_btn = Button(tab2, text="Max Rockets Hack", font=('Helvetica', 14), bg='#4CAF50', fg='white',
-                                  command=self.rockets_hack, width=20)
-        self.rockets_btn.pack(pady=5, fill='x')
-
-        self.flak_btn = Button(tab2, text="Max Flak Hack", font=('Helvetica', 14), bg='#4CAF50', fg='white',
-                               command=self.flak_hack, width=20)
-        self.flak_btn.pack(pady=5, fill='x')
-
-        self.thunder_btn = Button(tab2, text="Max Thunder Hack", font=('Helvetica', 14), bg='#4CAF50', fg='white',
-                                  command=self.thunder_hack, width=20)
-        self.thunder_btn.pack(pady=5, fill='x')
-
-        self.exit_btn = Button(self.win, text="Exit", font=('Helvetica', 14), bg='#f44336', fg='white',
-                               command=self.exit_program, width=20)
-        self.exit_btn.pack(pady=20, fill='x')
-
     def update_position(self):
         try:
             # Try to get the game window position and size
-            game_window = gw.getWindowsWithTitle('Heavy Weapon')[0]
+            game_window = gw.getWindowsWithTitle('AssaultCube')[0]
             x = game_window.left + (game_window.width - self.width) // 2
             y = game_window.top + (game_window.height - self.height) // 2
         except IndexError:
@@ -123,10 +89,10 @@ class ModMenu:
     def toggle_life_hack(self):
         if self.life_hack_active.is_set():
             self.life_hack_active.clear()
-            self.life_btn.config(text="Enable Life Hack")
+            self.life_btn.config(text="Enable Health Hack")
         else:
             self.life_hack_active.set()
-            self.life_btn.config(text="Disable Life Hack")
+            self.life_btn.config(text="Disable Health Hack")
             self.start_thread(self.life_hack)
 
     def toggle_armor_hack(self):
@@ -159,7 +125,7 @@ class ModMenu:
     def life_hack(self):
         while self.life_hack_active.is_set() and self.game_running:
             try:
-                self.mem_handler.write_value(BASE_ADDRESS_LIFE, OFFSETS_LIFE, 2)
+                self.mem_handler.write_value(BASE_ADDRESS_HEALTH, OFFSETS_HEALTH, 200)
             except Exception as e:
                 print(f"Error reading memory: {e}")
                 self.game_running = False
@@ -204,46 +170,6 @@ class ModMenu:
                 print(f"Error reading memory: {e}")
                 self.game_running = False
 
-    def aircraft_hack(self):
-        if self.game_running:
-            try:
-                self.mem_handler.write_value(BASE_ADDRESS_AIRCRAFT, OFFSETS_AIRCRAFT, 3)
-            except Exception as e:
-                print(f"Error reading memory: {e}")
-                self.game_running = False
-
-    def laser_hack(self):
-        if self.game_running:
-            try:
-                self.mem_handler.write_value(BASE_ADDRESS_LASER, OFFSETS_LASER, 3)
-            except Exception as e:
-                print(f"Error reading memory: {e}")
-                self.game_running = False
-
-    def rockets_hack(self):
-        if self.game_running:
-            try:
-                self.mem_handler.write_value(BASE_ADDRESS_ROCKETS, OFFSETS_ROCKETS, 3)
-            except Exception as e:
-                print(f"Error reading memory: {e}")
-                self.game_running = False
-
-    def flak_hack(self):
-        if self.game_running:
-            try:
-                self.mem_handler.write_value(BASE_ADDRESS_FLAK, OFFSETS_FLAK, 3)
-            except Exception as e:
-                print(f"Error reading memory: {e}")
-                self.game_running = False
-
-    def thunder_hack(self):
-        if self.game_running:
-            try:
-                self.mem_handler.write_value(BASE_ADDRESS_THUNDER, OFFSETS_THUNDER, 3)
-            except Exception as e:
-                print(f"Error reading memory: {e}")
-                self.game_running = False
-
     def start_thread(self, target):
         thread = Thread(target=target)
         thread.start()
@@ -255,11 +181,6 @@ class ModMenu:
         self.luke_hack_active.clear()
         self.splaser_hack_active.clear()
         self.orbs_hack_active.clear()
-        self.aircraft_hack_active.clear()
-        self.laser_hack_active.clear()
-        self.rockets_hack_active.clear()
-        self.flak_hack_active.clear()
-        self.thunder_hack_active.clear()
 
         for thread in self.threads:
             thread.join()

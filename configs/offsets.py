@@ -1,23 +1,46 @@
-BASE_ADDRESS_LIFE = 0x0000E240
-BASE_ADDRESS_ARMOR = 0x0000E240
-BASE_ADDRESS_LUKE = 0x0016BAC0
-BASE_ADDRESS_SPLASER = 0x0016BAC0
+BASE_ADDRESS_HEALTH = 0x0017E0A8
+BASE_ADDRESS_ARMOR = 0x0017E0A8
+BASE_ADDRESS_LUKE =
+BASE_ADDRESS_SPLASER =
 
-BASE_ADDRESS_ORBS = 0X001A437C
-BASE_ADDRESS_AIRCRAFT = 0x0000E240
-BASE_ADDRESS_LASER = 0x0000E240
-BASE_ADDRESS_ROCKETS = 0x0016C61C
-BASE_ADDRESS_FLAK = 0x0000E240
-BASE_ADDRESS_THUNDER = 0x0016C61C
+OFFSETS_HEALTH = [0xEC]
+OFFSETS_ARMOR = [0xF0]
+OFFSETS_LUKE = []
+OFFSETS_SPLASER = []
 
-OFFSETS_LIFE = [0x964]
-OFFSETS_ARMOR = [0x96C]
-OFFSETS_LUKE = [0x304, 0x5C, 0x968]
-OFFSETS_SPLASER = [0x12C]
 
-OFFSETS_ORBS = [0x980]
-OFFSETS_AIRCRAFT = [0x984]
-OFFSETS_LASER = [0x988]
-OFFSETS_ROCKETS = [0x14, 0x0, 0x4, 0x98C]
-OFFSETS_FLAK = [0x990]
-OFFSETS_THUNDER = [0x24, 0x140, 0x4, 0x994]
+class Pointer:
+    local_player = 0x0017E0A8
+    entity_list = 0x18AC04
+    fov = 0x18A7CC
+    player_count = 0x18AC0C
+
+"""class Offsets:
+    health = 0xEC
+    armor = 0xF0
+    name = 0x205
+
+    pos_x = 0x2C
+    pos_y = 0x30
+    pos_z = 0x28
+
+    head_pos_x = 0x4
+    head_pos_y = 0xC
+    head_pos_z = 0x8
+
+    camera_x = 0x34
+    camera_y = 0x38
+
+    assault_rifle_ammo = 0x140
+    submachine_gun_ammo = 0x138
+    sniper_ammo = 0x13C
+    shotgun_ammo = 0x134
+    pistol_ammo = 0x12C
+    grenade_ammo = 0x144
+
+    fast_fire_assault_rifle = 0x164
+    fast_fire_sniper = 0x160
+    fast_fire_shotgun = 0x158
+
+    auto_shoot = 0x204
+"""
