@@ -1,3 +1,4 @@
+import pyMeow as pm
 from gui.mod_menu import ModMenu
 from threading import Thread
 from memory.memory_reader import PymemHandler
@@ -6,6 +7,7 @@ from configs.config import OPEN
 from time import sleep
 import atexit
 import psutil
+from matrix.matrix_handling import esp_loop
 
 
 def keybinds(modmenu):
@@ -50,6 +52,13 @@ if __name__ == "__main__":
     check_game_running_thread = Thread(target=check_game_running, args=(modmenu,))
     check_game_running_thread.daemon = True
     check_game_running_thread.start()
+
+    proc = pm.open_process("ac_client.exe")
+    base = pm.get_module(proc, "ac_client.exe")["base"]
+
+    esp_thread = Thread(target=esp_loop, args=(proc, base, modmenu))  # Truyền modmenu vào đây
+    esp_thread.daemon = True
+    esp_thread.start()
 
     atexit.register(cleanup, modmenu, mem_handler)
 
