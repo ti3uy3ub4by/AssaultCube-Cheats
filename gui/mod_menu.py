@@ -1,13 +1,14 @@
+import pygetwindow as gw
+import pyautogui
+from threading import Thread
+from time import sleep
 from tkinter import Tk, Label, Button, Frame
 from tkinter import ttk
 from configs.config import BG, FG
-from configs.offsets import (
-    BASE_ADDRESS_ARMOR, OFFSETS_ARMOR, BASE_ADDRESS_HEALTH, OFFSETS_HEALTH
-)
-import pygetwindow as gw
-import pyautogui
-from threading import Thread, Event
-from time import sleep
+import keyboard
+
+from configs.offsets import BASE_ADDRESS_HEALTH, OFFSETS_HEALTH, BASE_ADDRESS_ARMOR, OFFSETS_ARMOR
+
 
 class ModMenu:
     def __init__(self, window_title, width, height, mem_handler):
@@ -20,8 +21,10 @@ class ModMenu:
         self.win.attributes("-alpha", 0.9)  # Độ trong suốt
         self.win.configure(background=BG)
 
+        self.visible = False  # Trạng thái hiển thị menu
+
         self.current_selection = 0
-        self.options = ['draw_box', 'draw_name', 'draw_health', 'life_hack', 'armor_hack', 'exit']
+        self.options = ['draw_box', 'draw_name', 'draw_health', 'draw_line', 'life_hack', 'armor_hack', 'exit']
         self.option_labels = {}
 
         self.life_hack_active = False
@@ -30,18 +33,21 @@ class ModMenu:
         self.draw_box_active = False
         self.draw_name_active = False
         self.draw_health_active = False
+        self.draw_line_active = False
 
         self.game_running = True
 
         self.create_widgets(window_title)
-        self.start_tracking_position()  # Bắt đầu theo dõi vị trí của cửa sổ game
         self.threads = []
 
         self.win.bind("<Up>", self.navigate)
         self.win.bind("<Down>", self.navigate)
         self.win.bind("<Left>", self.toggle_option)
         self.win.bind("<Right>", self.toggle_option)
-        self.win.bind("<Return>", self.execute_option)  # Thêm phím Enter để kích hoạt nút
+        self.win.bind("<Return>", self.execute_option)
+
+        # Bắt đầu lắng nghe phím F1
+        self.start_key_listener()
 
     def create_widgets(self, window_title):
         title_frame = Frame(self.win, bg=BG)
@@ -66,6 +72,9 @@ class ModMenu:
         self.option_labels['draw_health'] = Label(tab1, text="Draw Health: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
         self.option_labels['draw_health'].pack(pady=5, fill='x')
 
+        self.option_labels['draw_line'] = Label(tab1, text="Draw Line: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
+        self.option_labels['draw_line'].pack(pady=5, fill='x')
+
         self.option_labels['life_hack'] = Label(tab1, text="Health Hack: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
         self.option_labels['life_hack'].pack(pady=5, fill='x')
 
@@ -73,7 +82,7 @@ class ModMenu:
         self.option_labels['armor_hack'].pack(pady=5, fill='x')
 
         self.option_labels['exit'] = Button(self.win, text="Exit", font=('Helvetica', 14), bg=BG, fg=FG,
-                               command=self.exit_program, width=20)
+                                            command=self.exit_program, width=20)
         self.option_labels['exit'].pack(pady=20, fill='x')
 
     def navigate(self, event):
@@ -97,6 +106,10 @@ class ModMenu:
             self.draw_health_active = not self.draw_health_active
             state = "ON" if self.draw_health_active else "OFF"
             self.option_labels['draw_health'].config(text=f"Draw Health: {state}")
+        elif option == 'draw_line':
+            self.draw_line_active = not self.draw_line_active
+            state = "ON" if self.draw_line_active else "OFF"
+            self.option_labels['draw_line'].config(text=f"Draw Line: {state}")
         elif option == 'life_hack':
             self.life_hack_active = not self.life_hack_active
             state = "ON" if self.life_hack_active else "OFF"
@@ -123,6 +136,25 @@ class ModMenu:
             else:
                 label.config(bg=BG, fg=FG)
 
+    def toggle_visibility(self):
+        if self.visible:
+            self.win.withdraw()
+        else:
+            self.update_position()
+            self.win.deiconify()
+            self.win.focus_force()
+        self.visible = not self.visible
+
+    def start_key_listener(self):
+        def listen_f1():
+            while self.game_running:
+                if keyboard.is_pressed("F1"):
+                    self.toggle_visibility()
+                    sleep(0.3)  # Tránh việc toggle quá nhanh
+
+        key_thread = Thread(target=listen_f1, daemon=True)
+        key_thread.start()
+
     def update_position(self):
         try:
             game_window = gw.getWindowsWithTitle('AssaultCube')[0]
@@ -133,15 +165,6 @@ class ModMenu:
             x = (screen_width - self.width) // 2
             y = (screen_height - self.height) // 2
         self.win.geometry(f"{self.width}x{self.height}+{x}+{y}")
-
-    def start_tracking_position(self):
-        def track_position():
-            while self.game_running:
-                self.update_position()
-                sleep(0.1)  # Cập nhật vị trí mỗi 100ms
-
-        track_thread = Thread(target=track_position, daemon=True)
-        track_thread.start()
 
     def life_hack(self):
         while self.life_hack_active and self.game_running:
@@ -176,6 +199,8 @@ class ModMenu:
             thread.join()
 
     def exit_program(self):
-        self.game_running = False  # Ngừng theo dõi vị trí
+        self.game_running = False
         self.stop_hacks()
+        for thread in self.threads:
+            thread.join(timeout=1)
         self.win.destroy()

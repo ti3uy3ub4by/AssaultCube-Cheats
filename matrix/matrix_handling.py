@@ -1,5 +1,6 @@
-# matrix/matrix_handling.py
 import pyMeow as pm
+import pyautogui
+from time import sleep
 
 try:
     proc = pm.open_process("ac_client.exe")
@@ -7,6 +8,10 @@ try:
 except Exception as e:
     print(f"Failed to open process or get base module: {e}")
 
+# Check proc và base
+if not proc or not base:
+    print("Process or base module is invalid. Exiting...")
+    exit(1)
 
 class Pointer:
     player_count = 0x18AC0C
@@ -24,14 +29,15 @@ class Offsets:
 
 
 class Colors:
-    cyan = pm.get_color("cyan")
-    orange = pm.get_color("orange")
+    cyan = pm.get_color("green")
+    orange = pm.get_color("red")
     white = pm.get_color("white")
     black = pm.get_color("black")
 
 
 class Entity:
     def __init__(self, proc, addr):
+        self.proc = proc
         self.addr = addr
         self.health = pm.r_int(proc, addr + Offsets.health)
         if self.health <= 0:
@@ -45,16 +51,24 @@ class Entity:
         self.pos2d = self.fpos2d = None
         self.head = self.width = self.center = None
 
+    def is_valid_pos(self, pos2d, screen_width, screen_height):
+        return 0 <= pos2d["x"] <= screen_width and 0 <= pos2d["y"] <= screen_height
+
     def wts(self, vm):
-        try:
-            self.pos2d = pm.world_to_screen(vm, self.pos3d)
-            self.fpos2d = pm.world_to_screen(vm, self.fpos3d)
-            self.head = self.fpos2d["y"] - self.pos2d["y"]
-            self.width = self.head / 2
-            self.center = self.width / 2
-            return True
-        except:
-            return False
+        self.pos2d = pm.world_to_screen(vm, self.pos3d)
+        self.fpos2d = pm.world_to_screen(vm, self.fpos3d)
+
+        screen_width, screen_height = pyautogui.size()
+
+        if not (self.pos2d and self.fpos2d and
+                self.is_valid_pos(self.pos2d, screen_width, screen_height) and
+                self.is_valid_pos(self.fpos2d, screen_width, screen_height)):
+            return False  # Không làm gì thêm nếu tọa độ không hợp lệ
+
+        self.head = self.fpos2d["y"] - self.pos2d["y"]
+        self.width = self.head / 2
+        self.center = self.width / 2
+        return True
 
     def draw_box(self):
         pm.draw_rectangle(
@@ -101,6 +115,27 @@ class Entity:
             color=self.color,
         )
 
+    def draw_line(self):
+        if self.pos2d:
+            # Lấy độ phân giải màn hình thực tế
+            screen_width, screen_height = pyautogui.size()
+
+            # Xác định điểm gốc của Snapline (chỉnh sửa để đảm bảo ở giữa đáy màn hình)
+            line_origin = (screen_width // 2, screen_height - 1)  # Đảm bảo đúng vị trí ở dưới cùng
+
+            # Xác định điểm kết thúc của Snapline (vị trí 2D của đối tượng)
+            line_end = (self.pos2d["x"], self.pos2d["y"])
+
+            # Vẽ đường Snapline từ gốc đến đối tượng
+            pm.draw_line(
+                startPosX=line_origin[0],
+                startPosY=line_origin[1],
+                endPosX=line_end[0],
+                endPosY=line_end[1],
+                color=self.color
+            )
+
+
 def esp_loop(proc, base, modmenu):
     pm.overlay_init(target="AssaultCube", fps=144, trackTarget=True)
     while pm.overlay_loop():
@@ -122,6 +157,9 @@ def esp_loop(proc, base, modmenu):
                             ent.draw_name()
                         if modmenu.draw_health_active:
                             ent.draw_health()
-                except:
+                        if modmenu.draw_line_active:
+                            ent.draw_line()
+                except Exception as e:
                     continue
         pm.end_drawing()
+        sleep(0.01)

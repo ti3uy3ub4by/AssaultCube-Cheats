@@ -56,7 +56,7 @@ if __name__ == "__main__":
     proc = pm.open_process("ac_client.exe")
     base = pm.get_module(proc, "ac_client.exe")["base"]
 
-    esp_thread = Thread(target=esp_loop, args=(proc, base, modmenu))  # Truyền modmenu vào đây
+    esp_thread = Thread(target=esp_loop, args=(proc, base, modmenu))
     esp_thread.daemon = True
     esp_thread.start()
 
