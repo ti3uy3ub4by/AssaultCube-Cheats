@@ -1,16 +1,39 @@
-BASE_ADDRESS_HEALTH = 0x0017E0A8
-BASE_ADDRESS_ARMOR = 0x0017E0A8
-
-OFFSETS_HEALTH = [0xEC]
-OFFSETS_ARMOR = [0xF0]
-
 class Pointer:
     local_player = 0x0017E0A8
     entity_list = 0x18AC04
     fov = 0x18A7CC
     player_count = 0x18AC0C
+    view_matrix = 0x17DFD0
 
-"""class Offsets:
+
+class Offsets:
+    pos = 0x4
+    fpos = 0x28
+    team = 0x30C
+    name = 0x205
+    health = 0xEC
+    armor = 0xF0
+    knife_speed = 0x14C
+
+
+class AmmoOffsets:
+    assault_rifle = 0x140
+    submachine_gun = 0x138
+    sniper = 0x13C
+    shotgun = 0x134
+    pistol = 0x12C
+    grenade = 0x144
+
+
+class FastFireOffsets:
+    assault_rifle = 0x164
+    sniper = 0x160
+    shotgun = 0x158
+
+    auto_shoot = 0x204
+
+
+class PositionOffsets:
     pos_x = 0x2C
     pos_y = 0x30
     pos_z = 0x28
@@ -21,17 +44,3 @@ class Pointer:
 
     camera_x = 0x34
     camera_y = 0x38
-
-    assault_rifle_ammo = 0x140
-    submachine_gun_ammo = 0x138
-    sniper_ammo = 0x13C
-    shotgun_ammo = 0x134
-    pistol_ammo = 0x12C
-    grenade_ammo = 0x144
-
-    fast_fire_assault_rifle = 0x164
-    fast_fire_sniper = 0x160
-    fast_fire_shotgun = 0x158
-
-    auto_shoot = 0x204
-"""

@@ -1,6 +1,8 @@
 import pyMeow as pm
 import pyautogui
 from time import sleep
+from configs.offsets import Pointer, Offsets, AmmoOffsets, FastFireOffsets, PositionOffsets
+
 
 try:
     proc = pm.open_process("ac_client.exe")
@@ -13,7 +15,7 @@ if not proc or not base:
     print("Process or base module is invalid. Exiting...")
     exit(1)
 
-class Pointer:
+"""class Pointer:
     player_count = 0x18AC0C
     entity_list = 0x18AC04
     view_matrix = 0x17DFD0
@@ -26,7 +28,7 @@ class Offsets:
     team = 0x30C
     pos = 0x4
     fpos = 0x28
-
+"""
 
 class Colors:
     cyan = pm.get_color("green")
@@ -117,16 +119,9 @@ class Entity:
 
     def draw_line(self):
         if self.pos2d:
-            # Lấy độ phân giải màn hình thực tế
             screen_width, screen_height = pyautogui.size()
-
-            # Xác định điểm gốc của Snapline (chỉnh sửa để đảm bảo ở giữa đáy màn hình)
-            line_origin = (screen_width // 2, screen_height - 1)  # Đảm bảo đúng vị trí ở dưới cùng
-
-            # Xác định điểm kết thúc của Snapline (vị trí 2D của đối tượng)
+            line_origin = (screen_width // 2, screen_height - 1)
             line_end = (self.pos2d["x"], self.pos2d["y"])
-
-            # Vẽ đường Snapline từ gốc đến đối tượng
             pm.draw_line(
                 startPosX=line_origin[0],
                 startPosY=line_origin[1],

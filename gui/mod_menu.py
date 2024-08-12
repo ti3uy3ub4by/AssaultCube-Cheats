@@ -6,8 +6,7 @@ from tkinter import Tk, Label, Button, Frame
 from tkinter import ttk
 from configs.config import BG, FG
 import keyboard
-
-from configs.offsets import BASE_ADDRESS_HEALTH, OFFSETS_HEALTH, BASE_ADDRESS_ARMOR, OFFSETS_ARMOR
+from configs.offsets import Pointer, Offsets
 
 
 class ModMenu:
@@ -24,11 +23,13 @@ class ModMenu:
         self.visible = False  # Trạng thái hiển thị menu
 
         self.current_selection = 0
-        self.options = ['draw_box', 'draw_name', 'draw_health', 'draw_line', 'life_hack', 'armor_hack', 'exit']
+        self.options = ['draw_box', 'draw_name', 'draw_health', 'draw_line', 'life_hack', 'armor_hack', 'fast_knife', 'exit']
         self.option_labels = {}
 
         self.life_hack_active = False
         self.armor_hack_active = False
+        self.fast_knife_active = False
+
 
         self.draw_box_active = False
         self.draw_name_active = False
@@ -81,6 +82,9 @@ class ModMenu:
         self.option_labels['armor_hack'] = Label(tab1, text="Armor Hack: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
         self.option_labels['armor_hack'].pack(pady=5, fill='x')
 
+        self.option_labels['fast_knife'] = Label(tab1, text="Fast Knife: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
+        self.option_labels['fast_knife'].pack(pady=5, fill='x')
+
         self.option_labels['exit'] = Button(self.win, text="Exit", font=('Helvetica', 14), bg=BG, fg=FG,
                                             command=self.exit_program, width=20)
         self.option_labels['exit'].pack(pady=20, fill='x')
@@ -122,6 +126,12 @@ class ModMenu:
             self.option_labels['armor_hack'].config(text=f"Armor Hack: {state}")
             if self.armor_hack_active:
                 self.start_thread(self.armor_hack)
+        elif option == 'fast_knife':
+            self.fast_knife_active = not self.fast_knife_active
+            state = "ON" if self.fast_knife_active else "OFF"
+            self.option_labels['fast_knife'].config(text=f"Health Hack: {state}")
+            if self.fast_knife_active:
+                self.start_thread(self.fast_knife)
 
     def execute_option(self, event):
         option = self.options[self.current_selection]
@@ -169,7 +179,7 @@ class ModMenu:
     def life_hack(self):
         while self.life_hack_active and self.game_running:
             try:
-                self.mem_handler.write_value(BASE_ADDRESS_HEALTH, OFFSETS_HEALTH, 199)
+                self.mem_handler.write_value(Pointer.local_player, [Offsets.health], 101)
             except Exception as e:
                 print(f"Error reading memory: {e}")
                 self.game_running = False
@@ -179,7 +189,17 @@ class ModMenu:
     def armor_hack(self):
         while self.armor_hack_active and self.game_running:
             try:
-                self.mem_handler.write_value(BASE_ADDRESS_ARMOR, OFFSETS_ARMOR, 199)
+                self.mem_handler.write_value(Pointer.local_player, [Offsets.armor], 101)
+            except Exception as e:
+                print(f"Error reading memory: {e}")
+                self.game_running = False
+                break
+            sleep(0.1)
+
+    def fast_knife(self):
+        while self.fast_knife_active and self.game_running:
+            try:
+                self.mem_handler.write_value(Pointer.local_player, [Offsets.knife_speed], 0)
             except Exception as e:
                 print(f"Error reading memory: {e}")
                 self.game_running = False
@@ -194,6 +214,7 @@ class ModMenu:
     def stop_hacks(self):
         self.life_hack_active = False
         self.armor_hack_active = False
+        self.fast_knife_active = False
 
         for thread in self.threads:
             thread.join()

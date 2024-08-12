@@ -12,24 +12,37 @@ class PymemHandler:
             exit(1)
 
     def get_pointer_addr(self, base, offsets):
+        if not isinstance(offsets, (list, tuple)):
+            offsets = [offsets]  # Đảm bảo rằng offsets là một danh sách hoặc tuple
         try:
             addr = self.mem.read_int(base)
-            for offset in offsets:
-                if offset != offsets[-1]:
-                    addr = self.mem.read_int(addr + offset)
-            addr = addr + offsets[-1]
-            return addr
+            for offset in offsets[:-1]:
+                addr = self.mem.read_int(addr + offset)
+            return addr + offsets[-1]
         except Exception as e:
-            print(f"Error reading memory: {e}")
+            print(f"Error reading memory at base {base} with offsets {offsets}: {e}")
             return None
 
     def write_value(self, base_address, offsets, value):
         addr = self.get_pointer_addr(self.module + base_address, offsets)
         if addr is not None:
-            self.mem.write_int(addr, value)
+            try:
+                self.mem.write_int(addr, value)
+            except Exception as e:
+                print(f"Error writing value at address {addr}: {e}")
+
+    def read_value(self, base_address, offsets):
+        addr = self.get_pointer_addr(self.module + base_address, offsets)
+        if addr is not None:
+            try:
+                return self.mem.read_int(addr)
+            except Exception as e:
+                print(f"Error reading value at address {addr}: {e}")
+                return None
+        return None
 
     def close(self):
         try:
             self.mem.close_process()
-        except:
-            pass
+        except Exception as e:
+            print(f"Failed to close process: {e}")
