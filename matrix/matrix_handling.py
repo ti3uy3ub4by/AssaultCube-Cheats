@@ -3,7 +3,6 @@ import pyautogui
 from time import sleep
 from configs.offsets import Pointer, Offsets, AmmoOffsets, FastFireOffsets, PositionOffsets
 
-
 try:
     proc = pm.open_process("ac_client.exe")
     base = pm.get_module(proc, "ac_client.exe")["base"]
@@ -15,24 +14,10 @@ if not proc or not base:
     print("Process or base module is invalid. Exiting...")
     exit(1)
 
-"""class Pointer:
-    player_count = 0x18AC0C
-    entity_list = 0x18AC04
-    view_matrix = 0x17DFD0
-
-
-class Offsets:
-    name = 0x205
-    health = 0xEC
-    armor = 0xF0
-    team = 0x30C
-    pos = 0x4
-    fpos = 0x28
-"""
 
 class Colors:
-    cyan = pm.get_color("green")
-    orange = pm.get_color("red")
+    team1 = pm.get_color("green")
+    team2 = pm.get_color("red")
     white = pm.get_color("white")
     black = pm.get_color("black")
 
@@ -47,7 +32,7 @@ class Entity:
         self.name = pm.r_string(proc, addr + Offsets.name)
         self.armor = pm.r_int(proc, addr + Offsets.armor)
         self.team = pm.r_int(proc, addr + Offsets.team)
-        self.color = Colors.cyan if self.team else Colors.orange
+        self.color = Colors.team1 if self.team else Colors.team2
         self.pos3d = pm.r_vec3(proc, self.addr + Offsets.pos)
         self.fpos3d = pm.r_vec3(proc, self.addr + Offsets.fpos)
         self.pos2d = self.fpos2d = None
