@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QLabel, QPushButton
 
+
 class ModMenu(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -35,6 +36,7 @@ class ModMenu(QMainWindow):
         general_layout.addWidget(exit_button)
 
         exit_button.clicked.connect(self.close)
+
 
 if __name__ == "__main__":
     app = QApplication([])

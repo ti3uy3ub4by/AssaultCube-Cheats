@@ -6,7 +6,7 @@ from tkinter import Tk, Label, Button, Frame
 from tkinter import ttk
 from configs.config import BG, FG
 import keyboard
-from configs.offsets import Pointer, Offsets
+from configs.offsets import Pointer, Offsets, FastFireOffsets
 
 
 class ModMenu:
@@ -23,11 +23,11 @@ class ModMenu:
         self.visible = False  # Trạng thái hiển thị menu
 
         self.current_selection = 0
-        self.options = ['draw_box', 'draw_name', 'draw_health', 'draw_line', 'life_hack', 'armor_hack', 'fast_knife', 'exit']
+        self.options = ['life_hack', 'draw_box', 'draw_name', 'draw_health', 'draw_line', 'fast_shoot', 'fast_knife', 'exit']
         self.option_labels = {}
 
         self.life_hack_active = False
-        self.armor_hack_active = False
+        self.fast_shoot_active = False
         self.fast_knife_active = False
 
 
@@ -64,6 +64,9 @@ class ModMenu:
 
         notebook.add(tab1, text='Tab 1')
 
+        self.option_labels['life_hack'] = Label(tab1, text="Health Hack: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
+        self.option_labels['life_hack'].pack(pady=5, fill='x')
+
         self.option_labels['draw_box'] = Label(tab1, text="Draw Box: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
         self.option_labels['draw_box'].pack(pady=5, fill='x')
 
@@ -76,11 +79,8 @@ class ModMenu:
         self.option_labels['draw_line'] = Label(tab1, text="Draw Line: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
         self.option_labels['draw_line'].pack(pady=5, fill='x')
 
-        self.option_labels['life_hack'] = Label(tab1, text="Health Hack: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
-        self.option_labels['life_hack'].pack(pady=5, fill='x')
-
-        self.option_labels['armor_hack'] = Label(tab1, text="Armor Hack: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
-        self.option_labels['armor_hack'].pack(pady=5, fill='x')
+        self.option_labels['fast_shoot'] = Label(tab1, text="Fast Shoot: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
+        self.option_labels['fast_shoot'].pack(pady=5, fill='x')
 
         self.option_labels['fast_knife'] = Label(tab1, text="Fast Knife: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
         self.option_labels['fast_knife'].pack(pady=5, fill='x')
@@ -98,7 +98,13 @@ class ModMenu:
 
     def toggle_option(self, event):
         option = self.options[self.current_selection]
-        if option == 'draw_box':
+        if option == 'life_hack':
+            self.life_hack_active = not self.life_hack_active
+            state = "ON" if self.life_hack_active else "OFF"
+            self.option_labels['life_hack'].config(text=f"Health Hack: {state}")
+            if self.life_hack_active:
+                self.start_thread(self.life_hack)
+        elif option == 'draw_box':
             self.draw_box_active = not self.draw_box_active
             state = "ON" if self.draw_box_active else "OFF"
             self.option_labels['draw_box'].config(text=f"Draw Box: {state}")
@@ -114,22 +120,16 @@ class ModMenu:
             self.draw_line_active = not self.draw_line_active
             state = "ON" if self.draw_line_active else "OFF"
             self.option_labels['draw_line'].config(text=f"Draw Line: {state}")
-        elif option == 'life_hack':
-            self.life_hack_active = not self.life_hack_active
-            state = "ON" if self.life_hack_active else "OFF"
-            self.option_labels['life_hack'].config(text=f"Health Hack: {state}")
-            if self.life_hack_active:
-                self.start_thread(self.life_hack)
-        elif option == 'armor_hack':
-            self.armor_hack_active = not self.armor_hack_active
-            state = "ON" if self.armor_hack_active else "OFF"
-            self.option_labels['armor_hack'].config(text=f"Armor Hack: {state}")
-            if self.armor_hack_active:
-                self.start_thread(self.armor_hack)
+        elif option == 'fast_shoot':
+            self.fast_shoot_active = not self.fast_shoot_active
+            state = "ON" if self.fast_shoot_active else "OFF"
+            self.option_labels['fast_shoot'].config(text=f"Fast Shoot: {state}")
+            if self.fast_shoot_active:
+                self.start_thread(self.fast_shoot)
         elif option == 'fast_knife':
             self.fast_knife_active = not self.fast_knife_active
             state = "ON" if self.fast_knife_active else "OFF"
-            self.option_labels['fast_knife'].config(text=f"Health Hack: {state}")
+            self.option_labels['fast_knife'].config(text=f"Fast Knife: {state}")
             if self.fast_knife_active:
                 self.start_thread(self.fast_knife)
 
@@ -186,10 +186,11 @@ class ModMenu:
                 break
             sleep(0.1)
 
-    def armor_hack(self):
-        while self.armor_hack_active and self.game_running:
+    def fast_shoot(self):
+        while self.fast_shoot_active and self.game_running:
             try:
-                self.mem_handler.write_value(Pointer.local_player, [Offsets.armor], 101)
+                for offset in [FastFireOffsets.assault_rifle, FastFireOffsets.sniper, FastFireOffsets.shotgun]:
+                    self.mem_handler.write_value(Pointer.local_player, [offset], 0)
             except Exception as e:
                 print(f"Error reading memory: {e}")
                 self.game_running = False
@@ -213,7 +214,7 @@ class ModMenu:
 
     def stop_hacks(self):
         self.life_hack_active = False
-        self.armor_hack_active = False
+        self.fast_shoot_active = False
         self.fast_knife_active = False
 
         for thread in self.threads:
