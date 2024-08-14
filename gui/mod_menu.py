@@ -6,7 +6,7 @@ from tkinter import Tk, Label, Button, Frame
 from tkinter import ttk
 from configs.config import BG, FG
 import keyboard
-from configs.offsets import Pointer, Offsets, FastFireOffsets
+from configs.offsets import Pointer, Offsets, FastFireOffsets, AmmoOffsets
 
 
 class ModMenu:
@@ -23,13 +23,14 @@ class ModMenu:
         self.visible = False  # Trạng thái hiển thị menu
 
         self.current_selection = 0
-        self.options = ['life_hack', 'draw_box', 'draw_name', 'draw_health', 'draw_line', 'fast_shoot', 'fast_knife', 'exit']
+        self.options = ['life_hack', 'draw_box', 'draw_name', 'draw_health',
+                        'draw_line', 'fast_shoot', 'fast_knife', 'set_ammo', 'exit']
         self.option_labels = {}
 
         self.life_hack_active = False
         self.fast_shoot_active = False
         self.fast_knife_active = False
-
+        self.set_ammo_active = False
 
         self.draw_box_active = False
         self.draw_name_active = False
@@ -85,6 +86,9 @@ class ModMenu:
         self.option_labels['fast_knife'] = Label(tab1, text="Fast Knife: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
         self.option_labels['fast_knife'].pack(pady=5, fill='x')
 
+        self.option_labels['set_ammo'] = Label(tab1, text="Set Ammo: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
+        self.option_labels['set_ammo'].pack(pady=5, fill='x')
+
         self.option_labels['exit'] = Button(self.win, text="Exit", font=('Helvetica', 14), bg=BG, fg=FG,
                                             command=self.exit_program, width=20)
         self.option_labels['exit'].pack(pady=20, fill='x')
@@ -132,6 +136,12 @@ class ModMenu:
             self.option_labels['fast_knife'].config(text=f"Fast Knife: {state}")
             if self.fast_knife_active:
                 self.start_thread(self.fast_knife)
+        elif option == 'set_ammo':
+            self.set_ammo_active = not self.set_ammo_active
+            state = "Apply" if self.set_ammo_active else "OFF"
+            self.option_labels['set_ammo'].config(text=f"Set Ammo: {state}")
+            if self.set_ammo_active:
+                self.set_ammo()  # Gọi hàm set_ammo ngay lập tức
 
     def execute_option(self, event):
         option = self.options[self.current_selection]
@@ -206,6 +216,16 @@ class ModMenu:
                 self.game_running = False
                 break
             sleep(0.1)
+
+    def set_ammo(self):
+        if self.game_running:
+            try:
+                for offset in [AmmoOffsets.assault_rifle, AmmoOffsets.sniper, AmmoOffsets.shotgun, AmmoOffsets.pistol,
+                               AmmoOffsets.submachine_gun, AmmoOffsets.grenade]:
+                    self.mem_handler.write_value(Pointer.local_player, [offset], 99)
+            except Exception as e:
+                print(f"Error reading memory: {e}")
+                self.game_running = False
 
     def start_thread(self, target):
         thread = Thread(target=target)
