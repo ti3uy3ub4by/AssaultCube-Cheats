@@ -24,13 +24,15 @@ class ModMenu:
 
         self.current_selection = 0
         self.options = ['life_hack', 'draw_box', 'draw_name', 'draw_health',
-                        'draw_line', 'fast_shoot', 'fast_knife', 'set_ammo', 'exit']
+                        'draw_line', 'fast_shoot', 'fast_knife', 'set_ammo', 'fast_walk', 'exit']
         self.option_labels = {}
 
         self.life_hack_active = False
         self.fast_shoot_active = False
         self.fast_knife_active = False
         self.set_ammo_active = False
+        self.fast_walk_active = False
+
 
         self.draw_box_active = False
         self.draw_name_active = False
@@ -89,6 +91,9 @@ class ModMenu:
         self.option_labels['set_ammo'] = Label(tab1, text="Set Ammo: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
         self.option_labels['set_ammo'].pack(pady=5, fill='x')
 
+        self.option_labels['fast_walk'] = Label(tab1, text="Fast Walk: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
+        self.option_labels['fast_walk'].pack(pady=5, fill='x')
+
         self.option_labels['exit'] = Button(self.win, text="Exit", font=('Helvetica', 14), bg=BG, fg=FG,
                                             command=self.exit_program, width=20)
         self.option_labels['exit'].pack(pady=20, fill='x')
@@ -141,7 +146,13 @@ class ModMenu:
             state = "Apply" if self.set_ammo_active else "OFF"
             self.option_labels['set_ammo'].config(text=f"Set Ammo: {state}")
             if self.set_ammo_active:
-                self.set_ammo()  # Gọi hàm set_ammo ngay lập tức
+                self.start_thread(self.set_ammo)
+        elif option == 'fast_walk':
+            self.fast_walk_active = not self.fast_walk_active
+            state = "ON" if self.fast_walk_active else "OFF"
+            self.option_labels['fast_walk'].config(text=f"Fast Walk: {state}")
+            if self.fast_walk_active:
+                self.start_thread(self.fast_walk)
 
     def execute_option(self, event):
         option = self.options[self.current_selection]
@@ -218,14 +229,30 @@ class ModMenu:
             sleep(0.1)
 
     def set_ammo(self):
-        if self.game_running:
+        while self.set_ammo_active and self.game_running:
             try:
-                for offset in [AmmoOffsets.assault_rifle, AmmoOffsets.sniper, AmmoOffsets.shotgun, AmmoOffsets.pistol,
-                               AmmoOffsets.submachine_gun, AmmoOffsets.grenade]:
-                    self.mem_handler.write_value(Pointer.local_player, [offset], 99)
+                if keyboard.is_pressed('1'):  # Kiểm tra nếu phím '1' được nhấn
+                    for offset in [AmmoOffsets.assault_rifle, AmmoOffsets.sniper, AmmoOffsets.shotgun, AmmoOffsets.pistol,
+                                   AmmoOffsets.submachine_gun, AmmoOffsets.grenade]:
+                        self.mem_handler.write_value(Pointer.local_player, [offset], 99)
+                    sleep(0.5)
             except Exception as e:
                 print(f"Error reading memory: {e}")
                 self.game_running = False
+
+    def fast_walk(self):
+        speed_boost_active = False
+        try:
+            while self.fast_walk_active and self.game_running:
+                if keyboard.is_pressed('shift') and not speed_boost_active:
+                    self.mem_handler.write_value(Pointer.local_player, [Offsets.walk_speed], 4)
+                    speed_boost_active = True
+                elif not keyboard.is_pressed('shift') and speed_boost_active:
+                    self.mem_handler.write_value(Pointer.local_player, [Offsets.walk_speed], 0)
+                    speed_boost_active = False
+                sleep(0.1)
+        except Exception as e:
+            print(f"Error setting walk speed: {e}")
 
     def start_thread(self, target):
         thread = Thread(target=target)
@@ -236,6 +263,9 @@ class ModMenu:
         self.life_hack_active = False
         self.fast_shoot_active = False
         self.fast_knife_active = False
+        self.set_ammo_active = False
+        self.fast_walk_active = False
+
 
         for thread in self.threads:
             thread.join()

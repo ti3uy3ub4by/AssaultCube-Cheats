@@ -43,7 +43,7 @@ def cleanup(modmenu, mem_handler):
 
 if __name__ == "__main__":
     mem_handler = PymemHandler("ac_client.exe")
-    modmenu = ModMenu("AssaultCube Cheats", 400, 600, mem_handler)  # Adjusted window size for tabs
+    modmenu = ModMenu("AssaultCube Cheats", 400, 700, mem_handler)  # Adjusted window size for tabs
 
     keybinds_thread = Thread(target=keybinds, args=(modmenu,))
     keybinds_thread.daemon = True

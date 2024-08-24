@@ -1,7 +1,7 @@
 import pyMeow as pm
 import pyautogui
 from time import sleep
-from configs.offsets import Pointer, Offsets, AmmoOffsets, FastFireOffsets, PositionOffsets
+from configs.offsets import Pointer, Offsets
 
 try:
     proc = pm.open_process("ac_client.exe")

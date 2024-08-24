@@ -7,13 +7,14 @@ class Pointer:
 
 
 class Offsets:
-    pos = 0x4
-    fpos = 0x28
+    pos = 0x4 #head pos
+    fpos = 0x28 #foot pos
     team = 0x30C
     name = 0x205
     health = 0xEC
     armor = 0xF0
     knife_speed = 0x14C
+    walk_speed = 0x74
 
 
 class AmmoOffsets:
@@ -30,7 +31,7 @@ class FastFireOffsets:
     sniper = 0x160
     shotgun = 0x158
 
-    auto_shoot = 0x204
+#    auto_shoot = 0x204
 
 
 class PositionOffsets:
@@ -44,3 +45,14 @@ class PositionOffsets:
 
     camera_x = 0x34
     camera_y = 0x38
+
+"""
+gameMode = 0x18ABF8
+
+totalItemPickups = 0x17F2B4
+totalEntity = 0x1829B0
+localPlayerEntity = 0x18AC00
+
+itemType = 0x8
+itemAttr2 = 0x9
+"""
