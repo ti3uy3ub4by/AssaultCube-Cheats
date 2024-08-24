@@ -112,29 +112,38 @@ class Entity:
 
 
 def esp_loop(proc, base, modmenu):
-    pm.overlay_init(target="AssaultCube", fps=144, trackTarget=True)
-    while pm.overlay_loop():
-        pm.begin_drawing()
-        pm.draw_fps(10, 10)
-        player_count = pm.r_int(proc, base + Pointer.player_count)
-        if player_count > 1:
-            ent_buffer = pm.r_ints(
-                proc, pm.r_int(proc, base + Pointer.entity_list), player_count
-            )[1:]
-            v_matrix = pm.r_floats(proc, base + Pointer.view_matrix, 16)
-            for addr in ent_buffer:
-                try:
-                    ent = Entity(proc, addr)
-                    if ent.wts(v_matrix):
-                        if modmenu.draw_box_active:
-                            ent.draw_box()
-                        if modmenu.draw_name_active:
-                            ent.draw_name()
-                        if modmenu.draw_health_active:
-                            ent.draw_health()
-                        if modmenu.draw_line_active:
-                            ent.draw_line()
-                except Exception as e:
-                    continue
-        pm.end_drawing()
-        sleep(0.01)
+    try:
+        pm.overlay_init(target="AssaultCube", fps=144, trackTarget=True)
+        while pm.overlay_loop():
+            pm.begin_drawing()
+            pm.draw_fps(10, 10)
+            player_count = pm.r_int(proc, base + Pointer.player_count)
+            if player_count > 1:
+                ent_buffer = pm.r_ints(
+                    proc, pm.r_int(proc, base + Pointer.entity_list), player_count
+                )[1:]
+                v_matrix = pm.r_floats(proc, base + Pointer.view_matrix, 16)
+                for addr in ent_buffer:
+                    try:
+                        ent = Entity(proc, addr)
+                        if ent.wts(v_matrix):
+                            if modmenu.draw_box_active:
+                                ent.draw_box()
+                            if modmenu.draw_name_active:
+                                ent.draw_name()
+                            if modmenu.draw_health_active:
+                                ent.draw_health()
+                            if modmenu.draw_line_active:
+                                ent.draw_line()
+                    except Exception as e:
+                        print(f"Error processing entity: {e}")
+                        continue
+            pm.end_drawing()
+            sleep(0.01)
+    except Exception as e:
+        if "Window (AssaultCube) not found" in str(e):
+            print("Game window not found. Exiting cheat")
+        else:
+            print(f"Unexpected error in esp_loop: {e}")
+    finally:
+        print("Exiting cheat safely.")

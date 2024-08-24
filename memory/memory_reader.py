@@ -20,7 +20,6 @@ class PymemHandler:
                 addr = self.mem.read_int(addr + offset)
             return addr + offsets[-1]
         except Exception as e:
-            print(f"Error reading memory at base {base} with offsets {offsets}: {e}")
             return None
 
     def write_value(self, base_address, offsets, value):
