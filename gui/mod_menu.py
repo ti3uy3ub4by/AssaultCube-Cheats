@@ -17,7 +17,7 @@ class ModMenu:
         self.win = Tk()
         self.win.overrideredirect(True)  # Loại bỏ viền cửa sổ
         self.win.attributes("-topmost", True)  # Luôn ở trên cùng
-        self.win.attributes("-alpha", 0.9)  # Độ trong suốt
+        self.win.attributes("-alpha", 0.7)  # Độ trong suốt
         self.win.configure(background=BG)
 
         self.visible = False  # Trạng thái hiển thị menu
@@ -59,7 +59,7 @@ class ModMenu:
 
         # Nhóm Health Functions
         self.create_group("Health Functions", [
-            ('life_hack', "Health Hack")
+            ('life_hack', "Infinity Health")
         ])
 
         # Nhóm Visual Functions
