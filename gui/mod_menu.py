@@ -2,7 +2,7 @@ import pygetwindow as gw
 import pyautogui
 from threading import Thread
 from time import sleep
-from tkinter import Tk, Label, Button, Frame
+from tkinter import Tk, Label, Frame
 from tkinter import ttk
 from configs.config import BG, FG
 import keyboard
@@ -24,15 +24,14 @@ class ModMenu:
 
         self.current_selection = 0
         self.options = ['life_hack', 'draw_box', 'draw_name', 'draw_health',
-                        'draw_line', 'fast_shoot', 'fast_knife', 'set_ammo', 'fast_walk', 'exit']
+                        'draw_line', 'fast_shoot', 'fast_knife', 'fast_walk', 'set_ammo', 'exit']
         self.option_labels = {}
 
         self.life_hack_active = False
         self.fast_shoot_active = False
         self.fast_knife_active = False
-        self.set_ammo_active = False
         self.fast_walk_active = False
-
+        self.set_ammo_active = False
 
         self.draw_box_active = False
         self.draw_name_active = False
@@ -54,49 +53,52 @@ class ModMenu:
         self.start_key_listener()
 
     def create_widgets(self, window_title):
-        title_frame = Frame(self.win, bg=BG)
-        title_frame.pack(pady=10)
+        # Tạo tiêu đề
+        title_label = Label(self.win, text=window_title, font=('Helvetica', 14, 'bold'), bg=BG, fg='white')
+        title_label.pack(pady=5)
 
-        self.title_label = Label(title_frame, text=window_title, font=('Helvetica', 16, 'bold'), bg=BG, fg=FG)
-        self.title_label.pack()
+        # Nhóm Health Functions
+        self.create_group("Health Functions", [
+            ('life_hack', "Health Hack")
+        ])
 
-        notebook = ttk.Notebook(self.win)
-        notebook.pack(pady=10, padx=10, expand=True, fill='both')
+        # Nhóm Visual Functions
+        self.create_group("Visual Functions", [
+            ('draw_box', "Draw Box"),
+            ('draw_name', "Draw Name"),
+            ('draw_health', "Draw Health"),
+            ('draw_line', "Draw Line")
+        ])
 
-        tab1 = Frame(notebook, bg=BG)
+        # Nhóm Memory Functions
+        self.create_group("Memory Functions", [
+            ('fast_shoot', "Fast Shoot"),
+            ('fast_knife', "Fast Knife"),
+            ('fast_walk', "Fast Walk"),
+            ('set_ammo', "Set Ammo")
+        ])
 
-        notebook.add(tab1, text='Tab 1')
+        # Nút Exit
+        exit_button = Label(self.win, text="Exit", font=('Helvetica', 14, 'bold'), bg=BG, fg='red')
+        exit_button.pack(pady=10)
+        self.option_labels['exit'] = exit_button
 
-        self.option_labels['life_hack'] = Label(tab1, text="Health Hack: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
-        self.option_labels['life_hack'].pack(pady=5, fill='x')
+    def create_group(self, group_name, options):
+        group_frame = Frame(self.win, bg=BG)
+        group_frame.pack(fill='x', padx=10, pady=5)
 
-        self.option_labels['draw_box'] = Label(tab1, text="Draw Box: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
-        self.option_labels['draw_box'].pack(pady=5, fill='x')
+        group_label = Label(group_frame, text=f"[{group_name}]", font=('Helvetica', 12, 'bold'), fg='yellow', bg=BG)
+        group_label.pack(anchor='w')
 
-        self.option_labels['draw_name'] = Label(tab1, text="Draw Name: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
-        self.option_labels['draw_name'].pack(pady=5, fill='x')
+        for option_key, option_text in options:
+            option_frame = Frame(group_frame, bg=BG)
+            option_frame.pack(fill='x', padx=10, pady=2)
 
-        self.option_labels['draw_health'] = Label(tab1, text="Draw Health: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
-        self.option_labels['draw_health'].pack(pady=5, fill='x')
+            option_name_label = Label(option_frame, text=option_text, font=('Helvetica', 10), bg=BG, fg=FG)
+            option_name_label.pack(side='left')
 
-        self.option_labels['draw_line'] = Label(tab1, text="Draw Line: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
-        self.option_labels['draw_line'].pack(pady=5, fill='x')
-
-        self.option_labels['fast_shoot'] = Label(tab1, text="Fast Shoot: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
-        self.option_labels['fast_shoot'].pack(pady=5, fill='x')
-
-        self.option_labels['fast_knife'] = Label(tab1, text="Fast Knife: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
-        self.option_labels['fast_knife'].pack(pady=5, fill='x')
-
-        self.option_labels['set_ammo'] = Label(tab1, text="Set Ammo: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
-        self.option_labels['set_ammo'].pack(pady=5, fill='x')
-
-        self.option_labels['fast_walk'] = Label(tab1, text="Fast Walk: OFF", font=('Helvetica', 14), bg=BG, fg=FG)
-        self.option_labels['fast_walk'].pack(pady=5, fill='x')
-
-        self.option_labels['exit'] = Button(self.win, text="Exit", font=('Helvetica', 14), bg=BG, fg=FG,
-                                            command=self.exit_program, width=20)
-        self.option_labels['exit'].pack(pady=20, fill='x')
+            self.option_labels[option_key] = Label(option_frame, text="OFF", font=('Helvetica', 10), bg=BG, fg=FG)
+            self.option_labels[option_key].pack(side='right')
 
     def navigate(self, event):
         if event.keysym == "Up":
@@ -107,52 +109,74 @@ class ModMenu:
 
     def toggle_option(self, event):
         option = self.options[self.current_selection]
+
         if option == 'life_hack':
             self.life_hack_active = not self.life_hack_active
-            state = "ON" if self.life_hack_active else "OFF"
-            self.option_labels['life_hack'].config(text=f"Health Hack: {state}")
             if self.life_hack_active:
-                self.start_thread(self.life_hack)
+                self.option_labels['life_hack'].config(text="ON", fg="green")
+                self.start_thread(self.life_hack)  # Khởi chạy thread
+            else:
+                self.option_labels['life_hack'].config(text="OFF", fg="red")
+
         elif option == 'draw_box':
             self.draw_box_active = not self.draw_box_active
-            state = "ON" if self.draw_box_active else "OFF"
-            self.option_labels['draw_box'].config(text=f"Draw Box: {state}")
+            if self.draw_box_active:
+                self.option_labels['draw_box'].config(text="ON", fg="green")
+            else:
+                self.option_labels['draw_box'].config(text="OFF", fg="red")
+
         elif option == 'draw_name':
             self.draw_name_active = not self.draw_name_active
-            state = "ON" if self.draw_name_active else "OFF"
-            self.option_labels['draw_name'].config(text=f"Draw Name: {state}")
+            if self.draw_name_active:
+                self.option_labels['draw_name'].config(text="ON", fg="green")
+            else:
+                self.option_labels['draw_name'].config(text="OFF", fg="red")
+
         elif option == 'draw_health':
             self.draw_health_active = not self.draw_health_active
-            state = "ON" if self.draw_health_active else "OFF"
-            self.option_labels['draw_health'].config(text=f"Draw Health: {state}")
+            if self.draw_health_active:
+                self.option_labels['draw_health'].config(text="ON", fg="green")
+            else:
+                self.option_labels['draw_health'].config(text="OFF", fg="red")
+
         elif option == 'draw_line':
             self.draw_line_active = not self.draw_line_active
-            state = "ON" if self.draw_line_active else "OFF"
-            self.option_labels['draw_line'].config(text=f"Draw Line: {state}")
+            if self.draw_line_active:
+                self.option_labels['draw_line'].config(text="ON", fg="green")
+            else:
+                self.option_labels['draw_line'].config(text="OFF", fg="red")
+
         elif option == 'fast_shoot':
             self.fast_shoot_active = not self.fast_shoot_active
-            state = "ON" if self.fast_shoot_active else "OFF"
-            self.option_labels['fast_shoot'].config(text=f"Fast Shoot: {state}")
             if self.fast_shoot_active:
-                self.start_thread(self.fast_shoot)
+                self.option_labels['fast_shoot'].config(text="ON", fg="green")
+                self.start_thread(self.fast_shoot)  # Khởi chạy thread
+            else:
+                self.option_labels['fast_shoot'].config(text="OFF", fg="red")
+
         elif option == 'fast_knife':
             self.fast_knife_active = not self.fast_knife_active
-            state = "ON" if self.fast_knife_active else "OFF"
-            self.option_labels['fast_knife'].config(text=f"Fast Knife: {state}")
             if self.fast_knife_active:
-                self.start_thread(self.fast_knife)
-        elif option == 'set_ammo':
-            self.set_ammo_active = not self.set_ammo_active
-            state = "Apply" if self.set_ammo_active else "OFF"
-            self.option_labels['set_ammo'].config(text=f"Set Ammo: {state}")
-            if self.set_ammo_active:
-                self.start_thread(self.set_ammo)
+                self.option_labels['fast_knife'].config(text="ON", fg="green")
+                self.start_thread(self.fast_knife)  # Khởi chạy thread
+            else:
+                self.option_labels['fast_knife'].config(text="OFF", fg="red")
+
         elif option == 'fast_walk':
             self.fast_walk_active = not self.fast_walk_active
-            state = "ON" if self.fast_walk_active else "OFF"
-            self.option_labels['fast_walk'].config(text=f"Fast Walk: {state}")
             if self.fast_walk_active:
-                self.start_thread(self.fast_walk)
+                self.option_labels['fast_walk'].config(text="ON", fg="green")
+                self.start_thread(self.fast_walk)  # Khởi chạy thread
+            else:
+                self.option_labels['fast_walk'].config(text="OFF", fg="red")
+
+        elif option == 'set_ammo':
+            self.set_ammo_active = not self.set_ammo_active
+            if self.set_ammo_active:
+                self.option_labels['set_ammo'].config(text="ON", fg="green")
+                self.start_thread(self.set_ammo)  # Khởi chạy thread
+            else:
+                self.option_labels['set_ammo'].config(text="OFF", fg="red")
 
     def execute_option(self, event):
         option = self.options[self.current_selection]
@@ -163,9 +187,15 @@ class ModMenu:
         for i, option in enumerate(self.options):
             label = self.option_labels[option]
             if i == self.current_selection:
-                label.config(bg='#4CAF50', fg='white')
+                label.config(bg='#4CAF50')  # Chỉ thay đổi màu nền khi được chọn
             else:
-                label.config(bg=BG, fg=FG)
+                label.config(bg=BG)  # Khôi phục màu nền khi không được chọn
+
+            # Giữ nguyên màu sắc fg đã thiết lập trong toggle_option
+            if getattr(self, f"{option}_active", False):
+                label.config(fg="green")
+            elif option != 'exit':  # Chỉ đặt lại màu đỏ nếu không phải là nút 'exit'
+                label.config(fg="red")
 
     def toggle_visibility(self):
         if self.visible:
@@ -181,7 +211,7 @@ class ModMenu:
             while self.game_running:
                 if keyboard.is_pressed("F1"):
                     self.toggle_visibility()
-                    sleep(0.3)  # Tránh việc toggle quá nhanh
+                    sleep(0.9)  # Tránh việc toggle quá nhanh
 
         key_thread = Thread(target=listen_f1, daemon=True)
         key_thread.start()
@@ -228,24 +258,12 @@ class ModMenu:
                 break
             sleep(0.1)
 
-    def set_ammo(self):
-        while self.set_ammo_active and self.game_running:
-            try:
-                if keyboard.is_pressed('1'):  # Kiểm tra nếu phím '1' được nhấn
-                    for offset in [AmmoOffsets.assault_rifle, AmmoOffsets.sniper, AmmoOffsets.shotgun, AmmoOffsets.pistol,
-                                   AmmoOffsets.submachine_gun, AmmoOffsets.grenade]:
-                        self.mem_handler.write_value(Pointer.local_player, [offset], 99)
-                    sleep(0.5)
-            except Exception as e:
-                print(f"Error reading memory: {e}")
-                self.game_running = False
-
     def fast_walk(self):
         speed_boost_active = False
         try:
             while self.fast_walk_active and self.game_running:
                 if keyboard.is_pressed('shift') and not speed_boost_active:
-                    self.mem_handler.write_value(Pointer.local_player, [Offsets.walk_speed], 4)
+                    self.mem_handler.write_value(Pointer.local_player, [Offsets.walk_speed], 3)
                     speed_boost_active = True
                 elif not keyboard.is_pressed('shift') and speed_boost_active:
                     self.mem_handler.write_value(Pointer.local_player, [Offsets.walk_speed], 0)
@@ -253,6 +271,19 @@ class ModMenu:
                 sleep(0.1)
         except Exception as e:
             print(f"Error setting walk speed: {e}")
+
+    def set_ammo(self):
+        while self.set_ammo_active and self.game_running:
+            try:
+                if keyboard.is_pressed('1'):  # Kiểm tra nếu phím '1' được nhấn
+                    for offset in [AmmoOffsets.assault_rifle, AmmoOffsets.sniper, AmmoOffsets.shotgun,
+                                   AmmoOffsets.pistol,
+                                   AmmoOffsets.submachine_gun, AmmoOffsets.grenade]:
+                        self.mem_handler.write_value(Pointer.local_player, [offset], 99)
+                    sleep(0.5)
+            except Exception as e:
+                print(f"Error reading memory: {e}")
+                self.game_running = False
 
     def start_thread(self, target):
         thread = Thread(target=target)
@@ -263,9 +294,8 @@ class ModMenu:
         self.life_hack_active = False
         self.fast_shoot_active = False
         self.fast_knife_active = False
-        self.set_ammo_active = False
         self.fast_walk_active = False
-
+        self.set_ammo_active = False
 
         for thread in self.threads:
             thread.join()

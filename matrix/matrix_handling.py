@@ -9,11 +9,6 @@ try:
 except Exception as e:
     print(f"Failed to open process or get base module: {e}")
 
-# Check proc và base
-if not proc or not base:
-    print("Process or base module is invalid. Exiting...")
-    exit(1)
-
 
 class Colors:
     team1 = pm.get_color("green")
