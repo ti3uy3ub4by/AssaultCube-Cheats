@@ -136,7 +136,6 @@ def esp_loop(proc, base, modmenu):
                             if modmenu.draw_line_active:
                                 ent.draw_line()
                     except Exception as e:
-                        print(f"Error processing entity: {e}")
                         continue
             pm.end_drawing()
             sleep(0.01)

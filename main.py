@@ -42,7 +42,7 @@ def keybinds(modmenu):
                 modmenu.win.deiconify()
                 isopen = True
                 modmenu.win.focus_force()
-            sleep(0.5)  # Add a delay to prevent the key press from being registered multiple times
+            sleep(1)  # Add a delay to prevent the key press from being registered multiple times
 
 
 def check_game_running(modmenu):
